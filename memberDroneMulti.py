@@ -407,8 +407,9 @@ while True:
     except:
         print(str(now.time()) +  f": Connection error with: {sock.getpeername()}\n")
     finally:
-        print(str(now.time()) +  f": Connection closed from {sock.getpeername()}\n")
         if socketOn:
+            print(str(now.time()) +  f": Connection closed from {sock.getpeername()}\n")
+
             sock.close()
             socketOn = False
     
