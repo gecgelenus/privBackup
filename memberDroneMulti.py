@@ -106,14 +106,6 @@ def DistanceSafetyCheck():
 
 
 
-batteryCheckThread = threading.Thread(target=batterySafetyCheck)
-batteryCheckThread.start()
-
-
-
-distanceCheckThread = threading.Thread(target=DistanceSafetyCheck)
-distanceCheckThread.start()
-
 # Dron'un başka bir drone'a ve ya yer istasyonuna göndermek için kullandığı fonksiyon.
 # Veri gönderme işini bir fonksiyon içinde yapmamızın nedeni okunabilirliği arttırmak ve
 # gönderilen paketlerin yer istasyonunda kaydını tutmak için yazacağımız koda zemin hazırlamak.
@@ -501,6 +493,15 @@ def goto_direction(socket, distance, direction):
 # Aracınıza bağlanın )
 print("Araca bağlanılıyor...")
 vehicle = connect('/dev/ttyACM0', wait_ready=True)
+
+
+batteryCheckThread = threading.Thread(target=batterySafetyCheck)
+batteryCheckThread.start()
+
+
+
+distanceCheckThread = threading.Thread(target=DistanceSafetyCheck)
+distanceCheckThread.start()
 
 
 tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

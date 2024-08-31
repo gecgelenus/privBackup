@@ -135,6 +135,37 @@ while True:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
 
+
+        if msgArray[0] == "GETDRONEVOLTAGE": # istenilen dron'un konumunu sorgula
+            droneAdress = msgArray[1]
+            
+            tmpArr = droneAdress.split('-')
+            droneAdress = (tmpArr[0], int(tmpArr[1]))
+
+            if droneAdress not in members:
+                print(str(getTime()) +  f": Drone voltage is requested but given address is invalid: {droneAdress}\n")
+                raise
+
+            memberDroneSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                memberDroneSocket.connect(droneAdress)
+
+                tempMsg = f"REPORTVOLTAGE"
+
+                memberDroneSocket.send(tempMsg.encode("utf-8"))
+
+                tempMsg = None
+
+                while not tempMsg:
+                    tempMsg = memberDroneSocket.recv(1024).decode("utf-8")
+
+                sock.send(tempMsg.encode("utf-8"))
+            except:
+                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            finally:
+                print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
+                memberDroneSocket.close()
+
         if msgArray[0] == "GETDRONEALT": # istenilen dron'un yüksekliğini sorgula
             droneAdress = msgArray[1]
 
