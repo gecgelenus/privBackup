@@ -45,7 +45,7 @@ while True:
 
         if msgArray[0] == "NEWMEMBER": # havada olan dron listesine gelen adresteki dronu ekliyoruz
             print(str(getTime()) +  f": New member drone information recieved from {sock.getpeername()}\n")
-            members.append(addr)
+            members.append((addr[0], int(msgArray[1])))
         if msgArray[0] == "LISTMEMBERS": 
             # Var olan listedeki dronları test ediyoruz ve hala ulaşılabilir mi diye test ediyoruz.
             # Eğer ulaşılabilir değil ise adresi listeden çıkarıyoruz ve kalan adresleri geri döndürüyoruz.
