@@ -12,7 +12,7 @@ while True:
         msg = input("->")
         
 
-        tempSocket.connect(("10.15.162.8", 14550))
+        tempSocket.connect(("127.0.0.1", 3131))
 
         tempSocket.send(msg.encode("utf-8"))
         tempMsg = None
