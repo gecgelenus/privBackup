@@ -8,7 +8,7 @@ def getTime():
     return datetime.datetime.now()
 
 socketOn = False
-
+RESOLUTION = 5
 members = []
 relativeCoordinates = []
 targetCoordinates = []
@@ -19,6 +19,9 @@ localIp = socket.gethostbyname(hostname)
 if len(sys.argv) < 2:
     print("Invalid argument count, atleast one parameter should be given.")
     exit()
+
+def roundTo(num, base):
+    return num - (num % base)
 
 groundAddress = sys.argv[1]
 
@@ -88,7 +91,7 @@ def triangleFormation(x, y, z):
     for i in range(0, len(members)-1):
         print(i)
         print(str(getTime()) +  f": Current coordinates of {members[i]}:  X -> {relativeCoordinates[i][0]}, Y -> {relativeCoordinates[i][1]}, Z -> {relativeCoordinates[i][2]}\n")
-        print(str(getTime()) +  f": Rounded coordinates of {members[i]}:  X -> {round(relativeCoordinates[i][0])}, Y -> {round(relativeCoordinates[i][1])}, Z -> {round(relativeCoordinates[i][2])}\n")
+        print(str(getTime()) +  f": Rounded coordinates of {members[i]}:  X -> {roundTo(relativeCoordinates[i][0], RESOLUTION)}, Y -> {roundTo(relativeCoordinates[i][1], RESOLUTION)}, Z -> {roundTo(relativeCoordinates[i][2], RESOLUTION)}\n")
         
         print(str(getTime()) +  f": Target coordinates of {members[i]}:  X -> {targetCoordinates[i][0]}, Y -> {targetCoordinates[i][1]}, Z -> {targetCoordinates[i][2]}\n")
         open("waySave", "w").close() # kullanılacak yol dosyası temizleniyor. Önceden içinde bir şey olmadığından
@@ -96,7 +99,7 @@ def triangleFormation(x, y, z):
 
         inputFile = open("inputFile", "w")
 
-        inputFile.write(f"{round(relativeCoordinates[i][0])} {round(relativeCoordinates[i][1])} {round(relativeCoordinates[i][2])} {targetCoordinates[i][0]} {targetCoordinates[i][1]} {targetCoordinates[i][2]} 1")
+        inputFile.write(f"{roundTo(relativeCoordinates[i][0], RESOLUTION)} {roundTo(relativeCoordinates[i][1], RESOLUTION)} {roundTo(relativeCoordinates[i][2], RESOLUTION)} {targetCoordinates[i][0]} {targetCoordinates[i][1]} {targetCoordinates[i][2]} 1")
         # dron'un şuanki koordinatını ve gideceği yerin koordinatlarını, yol bulan programa veriyoruz. Sondaki 1, bulunan yolun, sonrasında bulucank yollar ile çakışmaması için kenara kaydetmesini söylüyor.
 
         inputFile.close()
@@ -114,9 +117,11 @@ def triangleFormation(x, y, z):
         wayFile.close()
 
         print(str(getTime()) +  f": Found way for {members[i]}\n")
-        print(way)
+        memberSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        memberSocket.connect((members[i], 3350))
+        msg = f"GOTO;{way}" 
 
-
+        memberSocket.send(msg.encode("utf-8"))
         
 
         

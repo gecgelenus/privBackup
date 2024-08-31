@@ -1,5 +1,6 @@
 import socket
 import datetime
+import sys
 
 
 
@@ -12,6 +13,14 @@ members = []
 
 mainDrone = ""
 
+
+if len(sys.argv) < 4:
+    print("Invalid argument count, should give: Latitude Longtitude Altitude")
+    exit()
+
+orijin_lat = sys.argv[1]
+orijin_lon = sys.argv[2]
+orijin_alt = sys.argv[3]
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -100,7 +109,7 @@ while True:
             try:
                 memberDroneSocket.connect((droneAdress, 3350))
 
-                tempMsg = "REPORTRELATIONALCOORDINATE"
+                tempMsg = f"REPORTRELATIONALCOORDINATE;{orijin_lat};{orijin_lon};{orijin_alt}"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
 
