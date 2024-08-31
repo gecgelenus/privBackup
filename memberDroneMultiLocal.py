@@ -507,7 +507,7 @@ tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 tempSocket.connect((groundAddress, 2350))
 
-tempMsg = "NEWMEMBER"
+tempMsg = f"NEWMEMBER;{PORT}"
 
 tempSocket.send(tempMsg.encode("utf-8"))
 
