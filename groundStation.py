@@ -11,7 +11,7 @@ def getTime():
 
 members = []
 
-mainDrone = ""
+mainDrone = "127.0.0.1"
 
 
 if len(sys.argv) < 4:
@@ -45,7 +45,11 @@ while True:
 
         if msgArray[0] == "NEWMEMBER": # havada olan dron listesine gelen adresteki dronu ekliyoruz
             print(str(getTime()) +  f": New member drone information recieved from {sock.getpeername()}\n")
-            members.append(addr[0])
+            
+            if addr[0] not in members:
+                members.append(addr[0])
+            else:
+                print(str(getTime()) +  f": This drone is already in list, but send NEWMEMBER message: {sock.getpeername()}\n")
         elif msgArray[0] == "LISTMEMBERS": 
             # Var olan listedeki dronları test ediyoruz ve hala ulaşılabilir mi diye test ediyoruz.
             # Eğer ulaşılabilir değil ise adresi listeden çıkarıyoruz ve kalan adresleri geri döndürüyoruz.
@@ -93,7 +97,7 @@ while True:
             mainDroneSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             mainDroneSocket.connect((mainDrone, 4350))
 
-            tempMsg = f"TASK;{taskType};{x},{y};{z}"
+            tempMsg = f"TASK;{taskType};{x};{y};{z}"
             
             mainDroneSocket.send(tempMsg.encode("utf-8"))
             mainDroneSocket.close()
@@ -253,6 +257,63 @@ while True:
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
+        elif msgArray[0] == "STOPARM":
+            droneAdress = msgArray[1]
+
+            if droneAdress not in members:
+                print(str(getTime()) +  f": Drone arm is requested but given address is invalid: {droneAdress}\n")
+                raise Exception("Invalid drone address")
+
+            memberDroneSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                memberDroneSocket.connect((droneAdress, 3350))
+
+                tempMsg = "STOPARM"
+
+                memberDroneSocket.send(tempMsg.encode("utf-8"))
+            except:
+                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            finally:
+                print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
+                memberDroneSocket.close()
+        elif msgArray[0] == "STOPTASK":
+            droneAdress = msgArray[1]
+
+            if droneAdress not in members:
+                print(str(getTime()) +  f": Drone task stop is requested but given address is invalid: {droneAdress}\n")
+                raise Exception("Invalid drone address")
+
+            memberDroneSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                memberDroneSocket.connect((droneAdress, 3350))
+
+                tempMsg = "STOPTASK"
+
+                memberDroneSocket.send(tempMsg.encode("utf-8"))
+            except:
+                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            finally:
+                print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
+                memberDroneSocket.close()
+        elif msgArray[0] == "STOPTAKEOFF":
+            droneAdress = msgArray[1]
+
+            if droneAdress not in members:
+                print(str(getTime()) +  f": Drone arm is requested but given address is invalid: {droneAdress}\n")
+                raise Exception("Invalid drone address")
+
+            memberDroneSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                memberDroneSocket.connect((droneAdress, 3350))
+
+                tempMsg = "STOPTAKEOFF"
+
+                memberDroneSocket.send(tempMsg.encode("utf-8"))
+            except:
+                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            finally:
+                print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
+                memberDroneSocket.close()
         elif msgArray[0] == "TAKEOFF":
             droneAdress = msgArray[1]
             if droneAdress not in members:
@@ -283,6 +344,44 @@ while True:
                 memberDroneSocket.connect((droneAdress, 3350))
 
                 tempMsg = "LAND"
+
+                memberDroneSocket.send(tempMsg.encode("utf-8"))
+            except:
+                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            finally:
+                print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
+                memberDroneSocket.close()
+        elif msgArray[0] == "HOLDTASK":
+            droneAdress = msgArray[1]
+
+            if droneAdress not in members:
+                print(str(getTime()) +  f": Holding task is requested but given address is invalid: {droneAdress}\n")
+                raise Exception("Invalid drone address")
+
+            memberDroneSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                memberDroneSocket.connect((droneAdress, 3350))
+
+                tempMsg = "HOLDTASK"
+
+                memberDroneSocket.send(tempMsg.encode("utf-8"))
+            except:
+                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            finally:
+                print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
+                memberDroneSocket.close()
+        elif msgArray[0] == "RESUMETASK":
+            droneAdress = msgArray[1]
+
+            if droneAdress not in members:
+                print(str(getTime()) +  f": Holding task is requested but given address is invalid: {droneAdress}\n")
+                raise Exception("Invalid drone address")
+
+            memberDroneSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                memberDroneSocket.connect((droneAdress, 3350))
+
+                tempMsg = "RESUMETASK"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
             except:
