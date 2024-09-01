@@ -8,7 +8,7 @@ def getTime():
     return datetime.datetime.now()
 
 socketOn = False
-RESOLUTION = 5
+RESOLUTION = 1
 members = []
 relativeCoordinates = []
 targetCoordinates = []
@@ -37,12 +37,16 @@ def triangleFormation(x, y, z):
 
 
     offset = 1
-    print(str(getTime()) +  f"Size of usedNodeFile: {os.path.getsize("usedNodeFile")}\n")
+    size = os.path.getsize("usedNodeFile")
+
+    offset = 1
+    print(str(getTime()) +  f"Size of usedNodeFile: {size}\n")
     f = open('usedNodeFile', 'r+')
     f.truncate(0) # need '0' when using r+
 
+    size = os.path.getsize("usedNodeFile")
     
-    print(str(getTime()) +  f"Size of usedNodeFile: {os.path.getsize("usedNodeFile")}\n")
+    print(str(getTime()) +  f"Size of usedNodeFile: {size}\n")
 
     startFile = open("startNodes", "w")
 
@@ -128,6 +132,87 @@ def triangleFormation(x, y, z):
 
 
 
+def testTask(x, y, z):
+    inputFile = open("inputFile", "w")
+
+    inputFile.write(f"clear")
+
+    inputFile.close()
+
+    time.sleep(1)
+
+    size = os.path.getsize("usedNodeFile")
+
+    offset = 1
+    print(str(getTime()) +  f"Size of usedNodeFile: {size}\n")
+    f = open('usedNodeFile', 'r+')
+    f.truncate(0) # need '0' when using r+
+
+    size = os.path.getsize("usedNodeFile")
+    
+    print(str(getTime()) +  f"Size of usedNodeFile: {size}\n")
+
+    startFile = open("startNodes", "w")
+
+    startFile.write(f"{relativeCoordinates[0][0]} {relativeCoordinates[0][1]} {relativeCoordinates[0][2]}\n")
+
+    startFile.close()
+
+    tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        tempSocket.connect((member, 3350)) 
+
+        tempMsg = "REPORTRELATIONALCOORDINATE" # XYZ koordinatlarını almak için gönderdiğimiz komut
+        tempSocket.send(tempMsg.encode("utf-8"))
+
+        tempMsg = None
+
+        while not tempMsg: # mesaj gelene kadar bekliyoruz
+            tempMsg = tempSocket.recv(1024).decode("utf-8")
+
+
+        tempArr = tempMsg.split(';') # gelen veriyi bölüyoruz
+
+        # gelen her koordinatı, havadaki drone'ların adreslerinin kayıtlı olduğu dizedeki sırayı
+        # koruyacak şekilde diziye ekliyoruz
+        relativeCoordinates.append((float(tempArr[0]), float(tempArr[1]), float(tempArr[2]))) 
+
+    except:
+        print(str(getTime()) +  f": Error while getting relative coordinates: {member}\n")
+    finally:
+        tempSocket.close()
+
+    print(str(getTime()) +  f": Current coordinates of {members[0]}:  X -> {relativeCoordinates[0][0]}, Y -> {relativeCoordinates[0][1]}, Z -> {relativeCoordinates[0][2]}\n")
+    print(str(getTime()) +  f": Rounded coordinates of {members[0]}:  X -> {roundTo(relativeCoordinates[0][0], RESOLUTION)}, Y -> {roundTo(relativeCoordinates[0][1], RESOLUTION)}, Z -> {roundTo(relativeCoordinates[0][2], RESOLUTION)}\n")
+    
+    print(str(getTime()) +  f": Target coordinates of {members[0]}:  X -> {targetCoordinates[0][0]}, Y -> {targetCoordinates[0][1]}, Z -> {targetCoordinates[0][2]}\n")
+    open("waySave", "w").close() # kullanılacak yol dosyası temizleniyor. Önceden içinde bir şey olmadığından
+    # emin oluyoruz.
+
+    inputFile = open("inputFile", "w")
+
+    inputFile.write(f"{roundTo(relativeCoordinates[0][0], RESOLUTION)} {roundTo(relativeCoordinates[0][1], RESOLUTION)} {roundTo(relativeCoordinates[0][2], RESOLUTION)} {targetCoordinates[0][0]} {targetCoordinates[0][1]} {targetCoordinates[0][2]} 1")
+    # dron'un şuanki koordinatını ve gideceği yerin koordinatlarını, yol bulan programa veriyoruz. Sondaki 1, bulunan yolun, sonrasında bulucank yollar ile çakışmaması için kenara kaydetmesini söylüyor.
+
+    inputFile.close()
+
+    wayFile = open("waySave", "r")
+
+
+    while os.path.getsize("inputFile"):
+        continue
+
+    way = wayFile.read() # bulunan yolu dosyadan okuyoruz
+
+    wayFile.close()
+
+    print(str(getTime()) +  f": Found way for {members[0]}\n")
+    memberSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    memberSocket.connect((members[0], 3350))
+    msg = f"GOTO;{way}" 
+
+    memberSocket.send(msg.encode("utf-8"))
+
 
 
 
@@ -152,7 +237,7 @@ while True:
         msgArray = msg.split(';')
 
         if msgArray[0] == "TASK": # havada olan dron listesine gelen adresteki dronu ekliyoruz
-            print(str(getTime()) +  f": New task request recieved from {sock.getpeername()}\n")
+            print(str(getTime()) +  f": New task request recieved\n")
             taskType = msgArray[1]
             x = msgArray[2]
             y = msgArray[3]
@@ -181,6 +266,9 @@ while True:
 
             if taskType == "TRIANGLE":
                 triangleFormation(float(x),float(y),float(z))
+            elif taskType == "TEST":
+                testTask(float(x),float(y),float(z))
+
                 
 
 
