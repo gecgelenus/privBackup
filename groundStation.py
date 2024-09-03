@@ -66,10 +66,9 @@ while True:
                     memberSocket.send(tempMsg.encode("utf-8"))
                     print(str(getTime()) +  f": Member is up: {member}\n")
                     memberListMsg += member + ";"
-                except:
-                    print(str(getTime()) +  f": Connection couldn't established with: {member}\n")
+                except Exception as ex:
+                    print(str(getTime()) +  f":CONNECTIONTEST -- Connection couldn't established with: {member}: {ex}\n")
                     members.remove(member)
-
                 finally:
                     memberSocket.close()
 
@@ -130,8 +129,8 @@ while True:
                     raise
                 print(str(getTime()) +  f": Location of: {droneAdress} X -> {tempLoc[0]}, Y -> {tempLoc[1]}, Z -> {tempLoc[2]}\n")
                 sock.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f": GETDRONELOC -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -159,8 +158,8 @@ while True:
 
                 print(str(getTime()) +  f": Altitude of: {droneAdress} -> {tempMsg}\n")
                 sock.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":GETDRONEALT -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -186,8 +185,8 @@ while True:
                 
 
                 sock.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":GETDRONEVOLTAGE -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -215,8 +214,8 @@ while True:
 
                 print(str(getTime()) +  f": GPS of: {droneAdress} -> Long: {tempGPS[0]}, Lat: {tempGPS[1]}\n")
                 sock.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":GETDRONEGPS -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -233,8 +232,8 @@ while True:
                 tempMsg = "BECOMEMAIN"
 
                 mainDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error connection with {mainDroneSocket.getpeername()}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":MAKEMAIN -- Error connection with {mainDroneSocket.getpeername()}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Closing connection with {mainDroneSocket.getpeername()}\n")
                 mainDroneSocket.close()
@@ -252,8 +251,8 @@ while True:
                 tempMsg = "ARM"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":ARM -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -271,8 +270,8 @@ while True:
                 tempMsg = "STOPARM"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":STOPARM -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -290,8 +289,8 @@ while True:
                 tempMsg = "STOPTASK"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":STOPTASK -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -309,8 +308,8 @@ while True:
                 tempMsg = "STOPTAKEOFF"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":STOPTAKEOFF -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -327,8 +326,8 @@ while True:
                 tempMsg = f"TAKEOFF;{msgArray[2]}"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":TAKEOFF -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -346,8 +345,8 @@ while True:
                 tempMsg = "LAND"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":LAND -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -365,8 +364,8 @@ while True:
                 tempMsg = "HOLDTASK"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":HOLDTASK -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -384,8 +383,8 @@ while True:
                 tempMsg = "RESUMETASK"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":RESUMETASK -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
@@ -405,14 +404,17 @@ while True:
                 tempMsg = f"GOTODIRECTION;{distance};{direction};{speed}"
 
                 memberDroneSocket.send(tempMsg.encode("utf-8"))
-            except:
-                print(str(getTime()) +  f": Error occured on connection with: {droneAdress}\n")
+            except Exception as ex:
+                print(str(getTime()) +  f":GOTODIRECTION -- Error occured on connection with: {droneAdress}: {ex}\n")
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
         elif msgArray[0] == "GETMAIN":
             print(str(getTime()) +  f": Main drone address requested from {mainDroneSocket.getpeername()}\n")
-            sock.send(mainDrone.encode("utf-8"))
+            try:
+                sock.send(mainDrone.encode("utf-8"))
+            except Exception as ex:
+                print(str(getTime()) +  f":GETMAIN -- Error occured on connection with: {droneAdress}: {ex}\n")
         elif msgArray[0] == "TAKEOFFSUCCESS":
             print(str(getTime()) +  f": Take off is success on drone {sock.getpeername()}\n")
         elif msgArray[0] == "ARMSUCCESS":

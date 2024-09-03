@@ -18,10 +18,14 @@ from geopy.point import Point
 HOST = '127.0.0.1'  
 PORT = 3350
 CHECK_DISTANCE = False
+CHECK_BATTERY = True
 CRITICAL_BATTERY_LEVEL = 10.7
 SAFE_DISTANCE = 50
+UWB_TAG_ADDR = '/dev/ttyACM0'
+PXHAWK_ADDR = '127.0.0.1:14550'
+
 if CHECK_DISTANCE:
-    ser = serial.Serial('/dev/ttyACM0', 115200)
+    ser = serial.Serial(UWB_TAG_ADDR, 115200)
 
 anchors = ["0x0A11", "0xCC8A"]
 anchors.sort()
@@ -425,7 +429,7 @@ def reportGPS(sock):
 
 
 # Yüksekliği gönderecek fonksiyon
-def reportAltitude(socket):
+def reportAltitude(sock):
     current_location = vehicle.location.global_relative_frame
     msg = f"{current_location.alt}"
     sock.send(msg.encode("utf-8"))
@@ -443,8 +447,8 @@ def reportRelationalCoordinate(sock, orijinLat, orijinLon, orijinAlt):
         print(msg)
 
         sock.send(msg.encode("utf-8"))
-    except:
-        print(str(getTime()) +  f": Error ocurred while reporting relational coordinate.\n")
+    except Exception as ex:
+        print(str(getTime()) +  f":REPORTRELATIONALCOORDINATE -- Error ocurred while reporting relational coordinate: {ex}\n")
     finally:
         sock.close()
     return  
@@ -483,7 +487,7 @@ def recieveTask(sock, lat, lon, alt,  wayList):
                 wayPoints.append(line.split(' '))
 
     except Exception as ex:
-        print(str(getTime()) +  f": Exception while parsing task: {ex}\n")
+        print(str(getTime()) +  f": RECIEVETASK -- Exception while parsing task: {ex}\n")
         
     wayPoints.reverse()
     del wayPoints[0]
@@ -501,40 +505,42 @@ def goto(ref_lat, ref_lon, ref_alt, coordArr):
 
     # coordArr[0] = (x,y,z)
     wayPointCount = 0   
-    
-    for x, y, z in coordArr:
-        if not taskContinue:
-            print(str(getTime()) +  f": Aborting task.\n")
-            return
-            
-
-
-        targetGPS = gps_from_xyz((ref_lat, ref_lon, ref_alt), float(x), float(y), float(z))
-        
-        print(targetGPS)
-        while True:
-            remaining_distance = get_distance_metres(vehicle.location.global_relative_frame, targetGPS)
-            print(f"Distance remaining: {remaining_distance:.2f} meter for waypoint {wayPointCount}")
-            vehicle.simple_goto(targetGPS)
-
+    try:
+        for x, y, z in coordArr:
             if not taskContinue:
                 print(str(getTime()) +  f": Aborting task.\n")
                 return
-        
-            for flag in holdFlag:
-                if flag:
-                    holdTask()
-        
-
-            if remaining_distance <= 1:
-                print("Location reached.")
-                break
-            time.sleep(0.5)
-
-        wayPointCount = wayPointCount + 1
+                
 
 
-    taskContinue = False
+            targetGPS = gps_from_xyz((ref_lat, ref_lon, ref_alt), float(x), float(y), float(z))
+            
+            print(targetGPS)
+            while True:
+                remaining_distance = get_distance_metres(vehicle.location.global_relative_frame, targetGPS)
+                print(f"Distance remaining: {remaining_distance:.2f} meter for waypoint {wayPointCount}")
+                vehicle.simple_goto(targetGPS)
+
+                if not taskContinue:
+                    print(str(getTime()) +  f": Aborting task.\n")
+                    return
+            
+                for flag in holdFlag:
+                    if flag:
+                        holdTask()
+            
+
+                if remaining_distance <= 1:
+                    print("Location reached.")
+                    break
+                time.sleep(0.5)
+
+            wayPointCount = wayPointCount + 1
+    except Exception as ex:
+        print(str(getTime()) +  f":GOTO -- Error occured while going to target: {ex}\n")
+    finally:
+        taskContinue = False
+    
     return
 
 def goto_direction(sock, distance, direction):
@@ -561,10 +567,11 @@ def goto_direction(sock, distance, direction):
 
 # Aracınıza bağlanın )
 print("Araca bağlanılıyor...")
-vehicle = connect('127.0.0.1:14550', wait_ready=True)
+vehicle = connect(PXHAWK_ADDR, wait_ready=True)
 
-batteryCheckThread = threading.Thread(target=batterySafetyCheck)
-batteryCheckThread.start()
+if CHECK_BATTERY:
+    batteryCheckThread = threading.Thread(target=batterySafetyCheck)
+    batteryCheckThread.start()
 
 
 if CHECK_DISTANCE:
@@ -637,6 +644,7 @@ while True:
             
         elif msgArray[0] == "GOTODIRECTION":
             print(str(getTime()) +  f": New task route recieved from {sock.getpeername()} on {msgArray[2]} for {msgArray[1]} m\n")
+            print(str(getTime()) +  f": GOTODIRECTION IS DEPRECATED!\n")
             
             if gotoDirectionThread != None:
                 print(str(getTime()) +  f": Directional task recieved but another task is already running!\n")
@@ -708,5 +716,4 @@ while True:
             socketOn = False
     
     
-
 

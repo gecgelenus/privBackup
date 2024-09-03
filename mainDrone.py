@@ -60,7 +60,7 @@ class Formation:
 
 
 socketOn = False
-RESOLUTION = 5
+RESOLUTION = 2
 members = []
 relativeCoordinates = []
 targetCoordinates = []
