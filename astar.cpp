@@ -59,6 +59,7 @@ void printWay(node* target);
 void drawWay(node* target, std::vector<std::string>& entityNames, std::string& color);
 void saveWayToFile(node* target);
 void readStartNodes();
+void readEndNodes();
 void resetWays();
 void clearNodes();
 void updateNodeList(std::string& path);
@@ -77,8 +78,16 @@ std::vector<node*> open;
 std::vector<node*> close;
 std::vector<node*> used;
 std::vector<node*> nodeList;
+std::vector<node*> nodeListBack;
+
 std::vector<node*> startNodes;
+std::vector<node*> endNodes;
+
 std::string usedNodeFile;
+
+node* start = nullptr;
+node* end = nullptr;
+
 
 bool writeDiscard = false;
 
@@ -103,7 +112,7 @@ int main(int argc, char** argv)
 
     readFile(fileName);
     //updateNodeList(usedNodeFile);
-
+    
 
 
 
@@ -145,9 +154,12 @@ while (true)
         std::ofstream ofs;
         ofs.open("inputFile", std::ofstream::out | std::ofstream::trunc);
         ofs.close();
+        readFile(fileName);
+
         continue;
     }
     readStartNodes();
+    readEndNodes();
 
     std::vector<std::string> arr;
 
@@ -186,8 +198,8 @@ while (true)
     }
     
 
-    node* start = findNode(std::stof(arr[0]), std::stof(arr[1]), std::stof(arr[2]));
-    node* end = findNode(std::stof(arr[3]), std::stof(arr[4]), std::stof(arr[5]));
+    start = findNode(std::stof(arr[0]), std::stof(arr[1]), std::stof(arr[2]));
+    end = findNode(std::stof(arr[3]), std::stof(arr[4]), std::stof(arr[5]));
 
 
     if(start == nullptr || end == nullptr){
@@ -196,6 +208,7 @@ while (true)
         ofs.open("inputFile", std::ofstream::out | std::ofstream::trunc);
         ofs.close();
         file.close();
+
         continue;
     }
 
@@ -235,6 +248,13 @@ bool iterNeighbor(node* cur, node* next, int cost) {
             return false;
         }
     }
+
+    for(node* s: endNodes){
+        if(next->id == s->id && s->id != end->id){
+            return false;
+        }
+    }
+    
 
     for (node* n : close) {
         if (n->id == next->id) {
@@ -362,7 +382,6 @@ void findWay(node* start, node* target, bool updateNodes) {
             start->g = 999999999;
             break;
         }
-        std::cout << "asd" << std::endl;
         for (int i = 0; i < min->neighbors.size(); i++) {
             if(min->neighbors[i]->used == true)
                 continue;
@@ -370,7 +389,6 @@ void findWay(node* start, node* target, bool updateNodes) {
 
 
         }
-        std::cout << "sadasda" << std::endl;
 
         close.push_back(min);
 
@@ -636,6 +654,39 @@ void readStartNodes(){
 
 
 }
+
+void readEndNodes(){
+
+    endNodes.clear();
+
+    std::ifstream file;
+    file.open("endNodes");
+
+    char buffer[512];
+    while (file.getline(buffer, sizeof(char) * 512)) {
+
+        std::stringstream ss(buffer);
+        std::string x;
+        std::string y;
+        std::string z;
+
+        ss >> x >> y >> z;
+        node* n = findNode(std::stof(x), std::stof(y), std::stof(z));
+        std::cout << "Ending Node: " << "-> X:" << x << " Y:" << y << " Z:" << z << std::endl;
+
+        if(n != nullptr)
+        {
+           endNodes.push_back(n);
+        }
+
+    }
+
+    file.close();
+
+
+
+}
+
 
 
 void clearNodes(){

@@ -2,7 +2,12 @@ import socket
 import datetime
 import sys
 import os
+import signal
+import subprocess
 import time
+
+graphCmd = "./astar graphFile5 usedNodeFile"
+
 
 def getTime():
     return datetime.datetime.now()
@@ -60,7 +65,7 @@ class Formation:
 
 
 socketOn = False
-RESOLUTION = 2
+RESOLUTION = 5
 members = []
 relativeCoordinates = []
 targetCoordinates = []
@@ -73,12 +78,19 @@ if len(sys.argv) < 2:
     exit()
 
 def roundTo(num, base):
-    return num - (num % base)
+    rounded_number = round(num / base) * base
+    return rounded_number
+
+global orijin_lat
+global orijin_lon
+global orijin_alt
+
 
 groundAddress = sys.argv[1]
 orijin_lat = sys.argv[2]
 orijin_lon = sys.argv[3]
 orijin_alt = sys.argv[4]
+
 
 def triangleFormation(x, y, z):
 
@@ -116,7 +128,6 @@ def triangleFormation(x, y, z):
 
             while not tempMsg: # mesaj gelene kadar bekliyoruz
                 tempMsg = tempSocket.recv(1024).decode("utf-8")
-
 
             tempArr = tempMsg.split(';') # gelen veriyi bölüyoruz
 
@@ -189,6 +200,10 @@ def triangleFormation(x, y, z):
 
 
 def lineFormation(x, y, z):
+    graphProcess = subprocess.Popen(graphCmd, stdout=subprocess.PIPE, 
+                       shell=True, preexec_fn=os.setsid)
+    
+    '''
     inputFile = open("inputFile", "w")
 
     inputFile.write(f"clear")
@@ -196,7 +211,7 @@ def lineFormation(x, y, z):
     inputFile.close()
 
     time.sleep(1)
-
+    '''
 
     offset = 1
     size = os.path.getsize("usedNodeFile")
@@ -246,11 +261,17 @@ def lineFormation(x, y, z):
 
 
 
-    formationObj = Formation(x, y, z, len(members), y, 10 ,"line")
+    formationObj = Formation(x, y, z, len(members), y, RESOLUTION ,"line")
     
     formation = formationObj.lineFormation()
 
-    
+    endFile = open("endNodes", "w")
+
+    for i in range(0, len(formation)):
+            print(str(getTime()) +  f": Writing end nodes. {i}\n")
+            endFile.write(f"{roundTo(formation[i][0], RESOLUTION)} {roundTo(formation[i][1], RESOLUTION)} {roundTo(formation[i][2], RESOLUTION)}\n")
+        
+    endFile.close()
         
 
     for i in range(0, len(members)-1):
@@ -268,6 +289,7 @@ def lineFormation(x, y, z):
         # dron'un şuanki koordinatını ve gideceği yerin koordinatlarını, yol bulan programa veriyoruz. Sondaki 1, bulunan yolun, sonrasında bulucank yollar ile çakışmaması için kenara kaydetmesini söylüyor.
 
         inputFile.close()
+        
     
         wayFile = open("waySave", "r")
         
@@ -287,6 +309,8 @@ def lineFormation(x, y, z):
         msg = f"GOTO;{orijin_lat};{orijin_lon};{orijin_alt};{way}" 
 
         memberSocket.send(msg.encode("utf-8"))
+        print(way)
+    os.killpg(os.getpgid(graphProcess.pid), signal.SIGTERM)
         
 
 
@@ -443,7 +467,14 @@ while True:
                 testTask(float(x),float(y),float(z))
             elif taskType == "LINE":
                 lineFormation(float(x),float(y),float(z))
-                
+        elif msgArray[0] == "SETORIJINGPS":
+            orijin_lat = msgArray[1]
+            orijin_lon = msgArray[2]
+            orijin_alt = msgArray[3]
+
+
+            
+            print(str(getTime()) +  f":Orijin point set to {orijin_lat} {orijin_lon} {orijin_alt}\n")  
 
 
         

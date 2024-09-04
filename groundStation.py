@@ -18,6 +18,11 @@ if len(sys.argv) < 4:
     print("Invalid argument count, should give: Latitude Longtitude Altitude")
     exit()
 
+global orijin_lat
+global orijin_lon
+global orijin_alt
+
+
 orijin_lat = sys.argv[1]
 orijin_lon = sys.argv[2]
 orijin_alt = sys.argv[3]
@@ -409,6 +414,21 @@ while True:
             finally:
                 print(str(getTime()) +  f": Connection closing: {droneAdress}\n")
                 memberDroneSocket.close()
+        elif msgArray[0] == "SETORIJINGPS":
+            mainDroneSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            mainDroneSocket.connect((mainDrone, 4350))
+            try:
+                orijin_lat = msgArray[1]
+                orijin_lon = msgArray[2]
+                orijin_alt = msgArray[3]
+                print(str(getTime()) +  f":Orijin point set to {orijin_lat} {orijin_lon} {orijin_alt}\n")
+                mainDroneSocket.send(msg.encode("utf-8"))
+                
+
+            except Exception as ex:
+                print(str(getTime()) +  f":SETORIJINGPS -- Error occured on connection with: {mainDroneSocket}: {ex}\n")
+            finally:
+                mainDroneSocket.close()
         elif msgArray[0] == "GETMAIN":
             print(str(getTime()) +  f": Main drone address requested from {mainDroneSocket.getpeername()}\n")
             try:
